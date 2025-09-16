@@ -1,0 +1,244 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Medical Chatbot</title>
+
+  <!-- Bootstrap + Font Awesome (only CSS) -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <!-- your external CSS (put style.css inside static/) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-funky">
+
+  <div class="container mt-4">
+    <h3 class="heading text-center">💊 Medical Chatbot</h3>
+
+    <div class="messaging" role="main" aria-label="Chat area">
+      <div id="chat-box" class="msg_history" aria-live="polite">
+        <!-- initial bot welcome message -->
+        <div class="incoming_msg">
+          <div class="incoming_msg_img">
+            <img src="https://ptetutorials.com/images/user-profile.png" alt="bot avatar">
+          </div>
+          <div class="received_msg">
+            <div class="received_withd_msg">
+              <p>Hello! 👋 I’m your medical assistant. Ask me anything about the document.</p>
+              <span class="time_date" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="type_msg">
+        <div class="input_msg_write">
+          <textarea id="user-input" rows="1" placeholder="Type your question here (press Enter to send)" aria-label="Type your question"></textarea>
+        </div>
+        <button id="send-btn" class="msg_send_btn" title="Send message" aria-label="Send">
+          <i class="fa fa-paper-plane" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="credit">
+      Made with ❤️ for SIH Prototype
+    </div>
+  </div>
+
+<script>
+/* -------------------------
+  Helper DOM + formatting
+   ------------------------- */
+const chatBox = document.getElementById('chat-box');
+const inputEl = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+
+function formatTimestamp(d = new Date()){
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  let h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2,'0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  const date = `${months[d.getMonth()]} ${d.getDate()}`;
+  return `${h}:${m} ${ampm} | ${date}`;
+}
+
+function scrollToBottom(){
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+/* escape user/bot text to prevent XSS (we will use textContent) */
+function createBotBubble(text){
+  const wrapper = document.createElement('div');
+  wrapper.className = 'incoming_msg';
+
+  const imgDiv = document.createElement('div');
+  imgDiv.className = 'incoming_msg_img';
+  const img = document.createElement('img');
+  img.src = 'https://ptetutorials.com/images/user-profile.png';
+  img.alt = 'bot';
+  imgDiv.appendChild(img);
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'received_msg';
+
+  const inner = document.createElement('div');
+  inner.className = 'received_withd_msg';
+  const p = document.createElement('p');
+  p.textContent = text;
+  inner.appendChild(p);
+
+  const ts = document.createElement('span');
+  ts.className = 'time_date';
+  ts.textContent = formatTimestamp();
+  inner.appendChild(ts);
+
+  msgDiv.appendChild(inner);
+  wrapper.appendChild(imgDiv);
+  wrapper.appendChild(msgDiv);
+  return wrapper;
+}
+
+function createUserBubble(text){
+  const wrapper = document.createElement('div');
+  wrapper.className = 'outgoing_msg';
+
+  const sent = document.createElement('div');
+  sent.className = 'sent_msg';
+  const p = document.createElement('p');
+  p.textContent = text;
+  sent.appendChild(p);
+
+  const ts = document.createElement('span');
+  ts.className = 'time_date';
+  ts.textContent = formatTimestamp();
+  sent.appendChild(ts);
+
+  wrapper.appendChild(sent);
+  return wrapper;
+}
+
+/* typing indicator (simple) */
+function createTypingIndicator(){
+  const wrapper = document.createElement('div');
+  wrapper.className = 'incoming_msg typing_msg';
+  wrapper.dataset.typing = '1';
+
+  const imgDiv = document.createElement('div');
+  imgDiv.className = 'incoming_msg_img';
+  const img = document.createElement('img');
+  img.src = 'https://ptetutorials.com/images/user-profile.png';
+  img.alt = 'bot';
+  imgDiv.appendChild(img);
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'received_msg';
+  const inner = document.createElement('div');
+  inner.className = 'received_withd_msg';
+  const p = document.createElement('p');
+  p.textContent = '⏳ Typing...';
+  inner.appendChild(p);
+  msgDiv.appendChild(inner);
+
+  wrapper.appendChild(imgDiv);
+  wrapper.appendChild(msgDiv);
+  return wrapper;
+}
+
+/* -------------------------
+  Send flow
+   ------------------------- */
+let sending = false;
+
+async function sendMessage(){
+  if (sending) return; // avoid concurrent sends
+  const raw = inputEl.value.trim();
+  if (!raw) return;
+
+  // 1) show user bubble immediately
+  const userBubble = createUserBubble(raw);
+  chatBox.appendChild(userBubble);
+  scrollToBottom();
+
+  // 2) clear input, disable UI
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  sendBtn.disabled = true;
+  inputEl.disabled = true;
+  sending = true;
+
+  // 3) add typing indicator
+  const typingNode = createTypingIndicator();
+  chatBox.appendChild(typingNode);
+  scrollToBottom();
+
+  // 4) POST to backend /ask
+  try {
+    const controller = new AbortController();
+    // optional timeout (20s)
+    const timeout = setTimeout(()=> controller.abort(), 20000);
+
+    const resp = await fetch('/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: raw }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    // remove typing indicator
+    if (typingNode && typingNode.parentNode) typingNode.parentNode.removeChild(typingNode);
+
+    if (!resp.ok) {
+      // network/server error
+      const errText = `⚠️ Server error (${resp.status})`;
+      chatBox.appendChild(createBotBubble(errText));
+    } else {
+      const data = await resp.json();
+      // accept data.answer or data.reply (flexible)
+      const answer = (data && (data.answer || data.reply || data.text)) || '⚠️ No answer returned by server.';
+      chatBox.appendChild(createBotBubble(answer));
+    }
+  } catch (err) {
+    // remove typing indicator if present
+    if (typingNode && typingNode.parentNode) typingNode.parentNode.removeChild(typingNode);
+
+    let msg = '⚠️ Network error: could not reach server.';
+    if (err.name === 'AbortError') msg = '⚠️ Request timed out.';
+    chatBox.appendChild(createBotBubble(msg));
+    console.error('sendMessage error:', err);
+  } finally {
+    sending = false;
+    sendBtn.disabled = false;
+    inputEl.disabled = false;
+    inputEl.focus();
+    scrollToBottom();
+  }
+}
+
+/* auto-resize textarea */
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = (inputEl.scrollHeight) + 'px';
+});
+
+/* click send */
+sendBtn.addEventListener('click', sendMessage);
+
+/* Enter to send (Shift+Enter to add newline) */
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+/* on load, focus input */
+window.addEventListener('load', () => { inputEl.focus(); scrollToBottom(); });
+</script>
+</body>
+</html>
+

@@ -3,7 +3,7 @@
 }
 
 .bg-funky {
-  background: #1976d2; /* friendly blue */
+  background: #111d29; /* friendly blue */
 }
 
 .heading {
@@ -18,7 +18,7 @@ img {
 
 /* Chat container */
 .messaging {
-  background: #fff;
+  background: #ffffffb8;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   padding: 20px;
@@ -82,7 +82,7 @@ img {
   background: #f1f3f4;
 }
 .msg_send_btn {
-  background: #1976d2;
+  background: #0d2536;
   border: none;
   border-radius: 50%;
   color: #fff;
@@ -96,6 +96,7 @@ img {
 /* Footer credit */
 .credit {
   margin-top: 20px;
+  color: #fff;
   text-align: center;
   font-size: 13px;
 }

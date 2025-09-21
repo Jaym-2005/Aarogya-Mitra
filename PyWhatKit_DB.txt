@@ -73,3 +73,13 @@ Time: 0:10
 Phone Number: +919125224222
 Message: Hello! How can I help you today?
 --------------------
+Date: 22/9/2025
+Time: 2:31
+Phone Number: +918253005195
+Message: Hello there! How can I help you today?
+--------------------
+Date: 22/9/2025
+Time: 2:32
+Phone Number: +918253005195
+Message: Acne is a common skin condition that occurs when hair follicles become clogged with oil and dead skin cells. This leads to the formation of pimples, blackheads, and whiteheads. Severe acne can cause scarring.
+--------------------

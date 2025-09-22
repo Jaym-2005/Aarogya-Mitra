@@ -83,3 +83,43 @@ Time: 2:32
 Phone Number: +918253005195
 Message: Acne is a common skin condition that occurs when hair follicles become clogged with oil and dead skin cells. This leads to the formation of pimples, blackheads, and whiteheads. Severe acne can cause scarring.
 --------------------
+Date: 22/9/2025
+Time: 2:43
+Phone Number: +918253005195
+Message: Hello there! How can I help you today?
+--------------------
+Date: 22/9/2025
+Time: 5:11
+Phone Number: +918253005195
+Message: Acne is a common skin condition that occurs when hair follicles become clogged with oil and dead skin cells. This leads to the formation of pimples, blackheads, and whiteheads. Severe acne can cause scarring.
+--------------------
+Date: 22/9/2025
+Time: 5:31
+Phone Number: +918253005195
+Message: ✅ Image 'Acne.webp' received. 🖼️ Image analysis coming soon.
+--------------------
+Date: 22/9/2025
+Time: 10:49
+Phone Number: +918253005195
+Message: Hello! How can I help you today?
+--------------------
+Date: 22/9/2025
+Time: 10:51
+Phone Number: +918253005195
+Message: Detected condition: sunscreen, sunblock, sun blocker 🩺I am sorry, but this document does not contain information on a sunscreen, sunblock, or sun blocker care pathway. Therefore, I cannot answer your question.
+--------------------
+Date: 22/9/2025
+Time: 13:37
+Phone Number: +916260572503
+Message: Hello! How can I help you today?
+--------------------
+Date: 22/9/2025
+Time: 13:40
+Phone Number: +916260572503
+Message: Hello! How can I help you today?
+--------------------
+Date: 22/9/2025
+Time: 13:54
+Phone Number: +916260572503
+Message: Joint pain is a symptom of various conditions, including arthritis, gout, and bursitis. It's characterized by inflammation, swelling, and pain in the affected joint(s). The specific cause needs to be diagnosed by a medical professional.
+--------------------

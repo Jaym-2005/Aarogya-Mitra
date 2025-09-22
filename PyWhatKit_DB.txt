@@ -138,3 +138,8 @@ Time: 4:18
 Phone Number: +916260572503
 Message: Hello! How can I help you today?
 --------------------
+Date: 23/9/2025
+Time: 5:11
+Phone Number: +916260572503
+Message: 📌 Active Health Alerts & Reminders:2025-09-24 09:00 - Vaccination: ⚕️ Reminder: Polio vaccination drive tomorrow at 10 AM.2025-09-25 08:00 - Disease Outbreak: 🚨 Alert: Dengue outbreak in your area. Avoid stagnant water.2025-09-26 10:00 - Vaccination: 💉 Reminder: Measles vaccination for children under 5 years.
+--------------------

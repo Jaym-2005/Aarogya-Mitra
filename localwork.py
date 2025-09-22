@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from src.prompt import *
 import os
 import threading   # To avoid blocking Flask
+from apscheduler.schedulers.background import BackgroundScheduler
+import datetime
 
 app = Flask(__name__)
 
@@ -58,6 +60,38 @@ EMERGENCY_HELP_TEXT = (
     "⚠️ Stay calm and call emergency services immediately!"
 )
 
+# ---------------- Alerts & Reminders ----------------
+ALERTS = [
+    {
+        "time": "2025-09-24 09:00",
+        "type": "Vaccination",
+        "message": "⚕️ Reminder: Polio vaccination drive tomorrow at 10 AM."
+    },
+    {
+        "time": "2025-09-25 08:00",
+        "type": "Disease Outbreak",
+        "message": "🚨 Alert: Dengue outbreak in your area. Avoid stagnant water."
+    },
+    {
+        "time": "2025-09-26 10:00",
+        "type": "Vaccination",
+        "message": "💉 Reminder: Measles vaccination for children under 5 years."
+    },
+]
+
+# ---------------- Scheduler for automatic alerts ----------------
+scheduler = BackgroundScheduler()
+
+def trigger_alert(alert):
+    # For demo: print to terminal; extend to WhatsApp/Telegram if needed
+    print(f"ALERT TRIGGERED: {alert['type']} - {alert['message']}")
+
+for alert in ALERTS:
+    run_time = datetime.datetime.strptime(alert["time"], "%Y-%m-%d %H:%M")
+    scheduler.add_job(trigger_alert, 'date', run_date=run_time, args=[alert])
+
+scheduler.start()
+
 # ---------------- Flask routes ----------------
 @app.route("/")
 def index():
@@ -66,13 +100,20 @@ def index():
 @app.route("/ask", methods=["POST"])
 def ask():
     data = request.get_json()
-    msg = data.get("question", "")
+    msg = data.get("question", "").lower()
     if not msg:
         return jsonify({"answer": "Please provide a valid question."})
     
-    if "emergency" in msg:
+    # Emergency
+    if "emergency" in msg or "help" in msg:
         return jsonify({"answer": EMERGENCY_HELP_TEXT})
-
+    
+    # Alerts/Reminders
+    if "alert" in msg or "reminder" in msg:
+        alerts_text = "\n\n".join([f"{a['time']} - {a['type']}: {a['message']}" for a in ALERTS])
+        return jsonify({"answer": f"📌 Active Health Alerts & Reminders:\n{alerts_text}"})
+    
+    # Normal RAG question
     print("User asked:", msg)
     response = rag_chain.invoke({"input": msg})
     answer = response.get("answer", "⚠️ No answer returned.")
@@ -83,13 +124,10 @@ def ask():
 # ---------------- Emergency Route ----------------
 @app.route("/help", methods=["GET"])
 def emergency():
-    """
-    Returns emergency help info.
-    Can be called from frontend or via API.
-    """
     return jsonify({"emergency_help": EMERGENCY_HELP_TEXT})
 
 # ---------------- Run Flask ----------------
 if __name__ == '__main__':
     print("🚀 Flask server running on http://127.0.0.1:8080")
     app.run(host="0.0.0.0", port=8080, debug=True)
+

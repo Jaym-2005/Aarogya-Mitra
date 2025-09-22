@@ -15,6 +15,8 @@ import pywhatkit   # WhatsApp
 import requests    # Telegram HTTP API
 import telebot     # Telegram polling
 import threading   # Run Telegram + Flask simultaneously
+from apscheduler.schedulers.background import BackgroundScheduler
+import datetime
 
 app = Flask(__name__)
 
@@ -88,7 +90,7 @@ def send_telegram_message(text):
         print(f"❌ Telegram error: {e}")
 
 # =====================================================
-# Emergency Help (NEW FEATURE)
+# Emergency Help (EXISTING)
 # =====================================================
 EMERGENCY_HELP_TEXT = (
     "🚨 EMERGENCY HELP 🚨\n\n"
@@ -105,6 +107,36 @@ EMERGENCY_HELP_TEXT = (
 )
 
 # =====================================================
+# Alerts & Reminders (NEW)
+# =====================================================
+ALERTS = [
+    {
+        "time": "2025-09-24 09:00",
+        "type": "Vaccination",
+        "message": "⚕️ Reminder: Polio vaccination drive tomorrow at 10 AM."
+    },
+    {
+        "time": "2025-09-25 08:00",
+        "type": "Disease Outbreak",
+        "message": "🚨 Alert: Dengue outbreak in your area. Avoid stagnant water."
+    },
+    {
+        "time": "2025-09-26 10:00",
+        "type": "Vaccination",
+        "message": "💉 Reminder: Measles vaccination for children under 5 years."
+    },
+]
+
+# Scheduler for automatic alert triggers (prints in terminal)
+scheduler = BackgroundScheduler()
+def trigger_alert(alert):
+    print(f"ALERT TRIGGERED: {alert['type']} - {alert['message']}")
+for alert in ALERTS:
+    run_time = datetime.datetime.strptime(alert["time"], "%Y-%m-%d %H:%M")
+    scheduler.add_job(trigger_alert, 'date', run_date=run_time, args=[alert])
+scheduler.start()
+
+# =====================================================
 # Telegram Polling Bot
 # =====================================================
 if TELEGRAM_BOT_TOKEN:
@@ -116,15 +148,27 @@ if TELEGRAM_BOT_TOKEN:
 
     @bot.message_handler(func=lambda message: True)
     def handle_message(message):
-        user_msg = message.text
-        response = rag_chain.invoke({"input": user_msg})
+        user_msg = message.text.lower()
+        
+        # Check for emergency keyword
+        if "emergency" in user_msg or "help" in user_msg:
+            bot.reply_to(message, EMERGENCY_HELP_TEXT)
+            return
+        
+        # Check for alerts/reminders keyword
+        if "alert" in user_msg or "reminder" in user_msg:
+            alerts_text = "\n\n".join([f"{a['time']} - {a['type']}: {a['message']}" for a in ALERTS])
+            bot.reply_to(message, f"📌 Active Health Alerts & Reminders:\n{alerts_text}")
+            return
+
+        response = rag_chain.invoke({"input": message.text})
         answer = response.get("answer", "⚠️ No answer returned by model.")
         bot.reply_to(message, answer)
 
     def start_telegram_polling():
         print("🚀 Telegram bot polling started...")
         bot.polling()
-
+    
     threading.Thread(target=start_telegram_polling, daemon=True).start()
 
 # =====================================================
@@ -160,8 +204,16 @@ def ask():
 
     # Case 1: Text only
     if msg and not image_path:
-        response = rag_chain.invoke({"input": msg})
-        answer = response.get("answer", "⚠️ No answer returned by model.")
+        # Emergency / Alerts check
+        lower_msg = msg.lower()
+        if "emergency" in lower_msg or "help" in lower_msg:
+            answer = EMERGENCY_HELP_TEXT
+        elif "alert" in lower_msg or "reminder" in lower_msg:
+            alerts_text = "\n\n".join([f"{a['time']} - {a['type']}: {a['message']}" for a in ALERTS])
+            answer = f"📌 Active Health Alerts & Reminders:\n{alerts_text}"
+        else:
+            response = rag_chain.invoke({"input": msg})
+            answer = response.get("answer", "⚠️ No answer returned by model.")
 
     # Case 2: Image present
     else:
@@ -184,11 +236,10 @@ def ask():
     return jsonify({"answer": answer})
 
 # =====================================================
-# Emergency API Route (NEW)
+# Emergency API Route
 # =====================================================
 @app.route("/emergency", methods=["GET"])
 def emergency():
-    # This lets frontend directly request emergency info
     send_whatsapp_message(EMERGENCY_HELP_TEXT)
     send_telegram_message(EMERGENCY_HELP_TEXT)
     return jsonify({"emergency_help": EMERGENCY_HELP_TEXT})

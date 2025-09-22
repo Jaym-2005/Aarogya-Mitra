@@ -88,7 +88,7 @@
     <div id="chat-box" class="msg_history" aria-live="polite">
       <div class="incoming_msg">
         <div class="incoming_msg_img">
-          <img src="https://ptetutorials.com/images/user-profile.png" alt="bot avatar">
+          <img src="static/images/icons8-doctor-chat-96.png" alt="bot avatar">      <!--HERE IS BOT PNG!!!!!!!!!!!!!!!!!-->
         </div>
         <div class="received_msg">
           <div class="received_withd_msg">
@@ -147,7 +147,7 @@ function scrollToBottom(){ chatBox.scrollTop = chatBox.scrollHeight; }
 function createBotBubble(text){
   const wrapper=document.createElement('div'); wrapper.className='incoming_msg';
   const imgDiv=document.createElement('div'); imgDiv.className='incoming_msg_img';
-  const img=document.createElement('img'); img.src='https://ptetutorials.com/images/user-profile.png'; img.alt='bot';
+  const img=document.createElement('img'); img.src='static/images/icons8-doctor-chat-96.png'; img.alt='bot';
   imgDiv.appendChild(img); const msgDiv=document.createElement('div'); msgDiv.className='received_msg';
   const inner=document.createElement('div'); inner.className='received_withd_msg';
   const p=document.createElement('p'); p.textContent=text; inner.appendChild(p);
@@ -170,7 +170,7 @@ function createUserBubble(text, file=null){
 function createTypingIndicator(){
   const wrapper=document.createElement('div'); wrapper.className='incoming_msg typing_msg'; wrapper.dataset.typing='1';
   const imgDiv=document.createElement('div'); imgDiv.className='incoming_msg_img';
-  const img=document.createElement('img'); img.src='https://ptetutorials.com/images/user-profile.png'; img.alt='bot';
+  const img=document.createElement('img'); img.src='static/images/icons8-doctor-chat-96.png'; img.alt='bot';
   imgDiv.appendChild(img); const msgDiv=document.createElement('div'); msgDiv.className='received_msg';
   const inner=document.createElement('div'); inner.className='received_withd_msg';
   const p=document.createElement('p'); p.textContent='⏳ Typing...'; inner.appendChild(p); msgDiv.appendChild(inner);

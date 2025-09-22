@@ -88,10 +88,31 @@ def send_telegram_message(text):
         print(f"❌ Telegram error: {e}")
 
 # =====================================================
+# Emergency Help (NEW FEATURE)
+# =====================================================
+EMERGENCY_HELP_TEXT = (
+    "🚨 EMERGENCY HELP 🚨\n\n"
+    "📞 Ambulance: 108\n"
+    "📞 Fire: 101\n"
+    "📞 Police: 100\n\n"
+    "🏥 Nearest Hospital: City Health Center\n"
+    "☎️ Hospital Helpline: +91-9876543210\n\n"
+    "💡 First Aid Tips:\n"
+    "1️⃣ For bleeding → Apply pressure with a clean cloth.\n"
+    "2️⃣ For burns → Run under cool water for 10 minutes.\n"
+    "3️⃣ For fainting → Lay person flat & loosen tight clothing.\n\n"
+    "⚠️ Stay calm and call emergency services immediately!"
+)
+
+# =====================================================
 # Telegram Polling Bot
 # =====================================================
 if TELEGRAM_BOT_TOKEN:
     bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
+
+    @bot.message_handler(commands=['help'])
+    def emergency_help(message):
+        bot.reply_to(message, EMERGENCY_HELP_TEXT)
 
     @bot.message_handler(func=lambda message: True)
     def handle_message(message):
@@ -161,6 +182,16 @@ def ask():
     send_telegram_message(answer)
 
     return jsonify({"answer": answer})
+
+# =====================================================
+# Emergency API Route (NEW)
+# =====================================================
+@app.route("/emergency", methods=["GET"])
+def emergency():
+    # This lets frontend directly request emergency info
+    send_whatsapp_message(EMERGENCY_HELP_TEXT)
+    send_telegram_message(EMERGENCY_HELP_TEXT)
+    return jsonify({"emergency_help": EMERGENCY_HELP_TEXT})
 
 # =====================================================
 # Main
